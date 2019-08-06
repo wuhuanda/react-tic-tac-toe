@@ -91,7 +91,7 @@ class Game extends React.Component {
         ? `Go to move #${move}`
         : 'Go to game start';
       const coordinate = move
-        ? `Col: ${(step.position + 4) % 3 || 3}, Row: ${Math.floor((step.position + 3) / 3) || 1}` // 有问题，需要取得元素在数组中的位置
+        ? `Col: ${(step.position + 4) % 3 || 3}, Row: ${Math.floor((step.position + 3) / 3) || 1}`
         : ''
         return (
           <li key={move}>
