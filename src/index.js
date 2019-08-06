@@ -48,6 +48,7 @@ class Game extends React.Component {
     super(props);
     this.state = {
       history: [{
+        position: -1,
         squares: Array(9).fill(null),
       }],
       stepNumber: 0,
@@ -65,6 +66,7 @@ class Game extends React.Component {
     squares[i] = this.state.xIsNext ? 'X' : 'O';
     this.setState({
       history: history.concat([{
+        position: i,
         squares,
       }]),
       stepNumber: history.length,
@@ -88,11 +90,15 @@ class Game extends React.Component {
       const desc = move
         ? `Go to move #${move}`
         : 'Go to game start';
+      const coordinate = move
+        ? `Col: ${(step.position + 4) % 3 || 3}, Row: ${Math.floor((step.position + 3) / 3) || 1}` // 有问题，需要取得元素在数组中的位置
+        : ''
         return (
           <li key={move}>
             <button onClick={() => this.jumpTo(move)}>
               {desc}
             </button>
+            <span style={{ paddingLeft: '10px' }}>{coordinate}</span>
           </li>
         );
     });
