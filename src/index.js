@@ -93,8 +93,11 @@ class Game extends React.Component {
       const coordinate = move
         ? `Col: ${(step.position + 4) % 3 || 3}, Row: ${Math.floor((step.position + 3) / 3) || 1}`
         : ''
+      const activeClass = this.state.stepNumber === move
+        ? 'list-active'
+        : ''
         return (
-          <li key={move}>
+          <li className={activeClass} key={move}>
             <button onClick={() => this.jumpTo(move)}>
               {desc}
             </button>
