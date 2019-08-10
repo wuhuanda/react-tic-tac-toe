@@ -52,13 +52,20 @@ class Game extends React.Component {
         position: -1,
         squares: Array(9).fill(null),
       }],
+      recordList: [{
+        position: -1,
+        squares: Array(9).fill(null),
+        stepNumber: 0,
+      }],
       stepNumber: 0,
       xIsNext: true,
+      isRecordAsc: true,
     }
   }
 
   handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const recordList = this.state.recordList.slice(0, this.state.stepNumber + 1);
     const current = history[this.state.stepNumber];
     const squares = current.squares.slice();
     if (calculateWinner(squares) || squares[i]) {
@@ -69,6 +76,11 @@ class Game extends React.Component {
       history: history.concat([{
         position: i,
         squares,
+      }]),
+      recordList: recordList.concat([{
+        position: i,
+        squares,
+        stepNumber: history.length,
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -82,24 +94,43 @@ class Game extends React.Component {
     });
   }
 
+  toggleSortby() {
+    const isRecordAsc = !this.state.isRecordAsc
+    const recordList = this.state.recordList.slice(0)
+
+    recordList.sort((a, b) => {
+      return isRecordAsc
+        ? a.stepNumber - b.stepNumber
+        : b.stepNumber - a.stepNumber
+    })
+
+    this.setState({
+      isRecordAsc,
+      recordList,
+    });
+  }
+
   render() {
     const history = this.state.history;
+    const recordList = this.state.recordList
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const isRecordAsc = this.state.isRecordAsc;
 
-    const moves = history.map((step, move) => {
-      const desc = move
-        ? `Go to move #${move}`
+    const moves = recordList.map((step) => {
+      const desc = step.stepNumber
+        ? `Go to move #${step.stepNumber}`
         : 'Go to game start';
-      const coordinate = move
+      const coordinate = step.stepNumber
         ? `Col: ${(step.position + 4) % 3 || 3}, Row: ${Math.floor((step.position + 3) / 3) || 1}`
         : '';
-      const activeClass = this.state.stepNumber === move
+      const activeClass = this.state.stepNumber === step.stepNumber
         ? 'list-active'
         : '';
       return (
-        <li className={activeClass} key={move}>
-          <button onClick={() => this.jumpTo(move)}>
+        <li className={activeClass} key={step.stepNumber}>
+          <span>{step.stepNumber}. </span>
+          <button onClick={() => this.jumpTo(step.stepNumber)}>
             {desc}
           </button>
           <span style={{ paddingLeft: '10px' }}>{coordinate}</span>
@@ -120,7 +151,10 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <button onClick={() => this.toggleSortby()}>
+            {isRecordAsc ? 'ASC' : 'DESC'}
+          </button>
+          <ul>{moves}</ul>
         </div>
       </div>
     );
