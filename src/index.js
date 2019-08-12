@@ -4,7 +4,7 @@ import './index.css';
 
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button className="square" style={props.winnerStyle} onClick={props.onClick}>
       {props.value}
     </button>
   );
@@ -12,10 +12,14 @@ function Square(props) {
 
 class Board extends React.Component {
   renderSquare(i) {
+    const winnerStyle = this.props.winnerIndexs.includes(i)
+      ? {color: '#f00'}
+      : {}
     return (
       <Square
         value={this.props.squares[i]}
         key={i}
+        winnerStyle={winnerStyle}
         onClick={() => this.props.onClick(i)}
       />
     );
@@ -60,6 +64,7 @@ class Game extends React.Component {
       stepNumber: 0,
       xIsNext: true,
       isRecordAsc: true,
+      winnerIndexs: [],
     }
   }
 
@@ -68,10 +73,21 @@ class Game extends React.Component {
     const recordList = this.state.recordList.slice(0, this.state.stepNumber + 1);
     const current = history[this.state.stepNumber];
     const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
+
+    if (squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
+    const winnerObj = calculateWinner(squares);
+    if (winnerObj) {
+      if (this.state.winnerIndexs.length !== 0) {
+        return;
+      }
+      this.setState({
+        winnerIndexs: winnerObj.winnerIndexs
+      })
+    }
+
     this.setState({
       history: history.concat([{
         position: i,
@@ -112,10 +128,11 @@ class Game extends React.Component {
 
   render() {
     const history = this.state.history;
-    const recordList = this.state.recordList
+    const recordList = this.state.recordList;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winnerObj = calculateWinner(current.squares);
     const isRecordAsc = this.state.isRecordAsc;
+    const winnerIndexs = this.state.winnerIndexs;
 
     const moves = recordList.map((step) => {
       const desc = step.stepNumber
@@ -139,15 +156,15 @@ class Game extends React.Component {
     });
 
     let status;
-    if (winner) {
-      status = `Winner: ${winner}`
+    if (winnerObj) {
+      status = `Winner: ${winnerObj.winner}`
     } else {
       status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
     }
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+          <Board squares={current.squares} winnerIndexs={winnerIndexs} onClick={i => this.handleClick(i)} />
         </div>
         <div className="game-info">
           <div>{status}</div>
@@ -182,7 +199,10 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return {
+        winner: squares[a],
+        winnerIndexs: [a, b, c],
+      };
     }
   }
   return null;
