@@ -65,6 +65,7 @@ class Game extends React.Component {
       xIsNext: true,
       isRecordAsc: true,
       winnerIndexs: [],
+      isDraw: false,
     }
   }
 
@@ -101,6 +102,12 @@ class Game extends React.Component {
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
     });
+
+    if(this.state.winnerIndexs.length === 0 && squares.every(e => e !== null)) {
+      this.setState({
+        isDraw: true,
+      });
+    }
   }
 
   jumpTo(step) {
@@ -134,6 +141,7 @@ class Game extends React.Component {
     const winnerObj = calculateWinner(current.squares);
     const isRecordAsc = this.state.isRecordAsc;
     const winnerIndexs = this.state.winnerIndexs;
+    const isDraw = this.state.isDraw;
 
     const moves = recordList.map((step) => {
       const desc = step.stepNumber
@@ -159,6 +167,8 @@ class Game extends React.Component {
     let status;
     if (winnerObj) {
       status = `Winner: ${winnerObj.winner}`
+    } else if (isDraw) {
+      status = 'Draw!'
     } else {
       status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
     }
